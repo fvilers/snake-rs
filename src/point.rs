@@ -1,6 +1,7 @@
 use rand::Rng;
+use std::ops::Add;
 
-#[derive(Default, Clone, PartialEq, Eq)]
+#[derive(Default, Clone, PartialEq, Eq, Copy)]
 pub struct Point {
     pub(crate) x: u16,
     pub(crate) y: u16,
@@ -18,7 +19,18 @@ impl Point {
         Self::new(x, y)
     }
 
-    pub const fn coords(&self) -> (u16, u16) {
+    pub const fn coords(self) -> (u16, u16) {
         (self.x, self.y)
+    }
+}
+
+impl Add for Point {
+    type Output = Self;
+
+    fn add(self, other: Self) -> Self {
+        Self {
+            x: self.x + other.x,
+            y: self.y + other.y,
+        }
     }
 }

@@ -8,6 +8,7 @@ use game::Game;
 use point::Point;
 use std::{
     io::{Result, Write},
+    ops::Add,
     thread,
     time::Duration,
 };
@@ -15,6 +16,9 @@ use std::{
 mod direction;
 mod game;
 mod point;
+
+const GAME_COLUMNS: u16 = 30;
+const GAME_ROWS: u16 = 15;
 
 /// # Errors
 ///
@@ -25,25 +29,44 @@ where
 {
     execute!(w, terminal::EnterAlternateScreen)?;
     terminal::enable_raw_mode()?;
-    execute!(
+
+    let ui_shift = Point::new(1, 1);
+
+    queue!(
         w,
         style::ResetColor,
         terminal::Clear(ClearType::All),
         cursor::Hide,
+        cursor::MoveTo(0, 0),
+        style::Print(format!("╔{}╗", "═".repeat(GAME_COLUMNS as usize))),
     )?;
 
-    let (columns, rows) = terminal::size()?;
-    let mut game = Game::new(columns, rows);
+    for _ in 0..GAME_ROWS {
+        queue!(
+            w,
+            cursor::MoveToNextLine(1),
+            style::Print(format!("║{}║", " ".repeat(GAME_COLUMNS as usize))),
+        )?;
+    }
+
+    queue!(
+        w,
+        cursor::MoveToNextLine(1),
+        style::Print(format!("╚{}╝", "═".repeat(GAME_COLUMNS as usize))),
+    )?;
+    w.flush()?;
+
+    let mut game = Game::new(GAME_COLUMNS, GAME_ROWS);
     let mut previous_prints: Vec<Point> = Vec::new();
 
     loop {
-        let snake: Vec<&Point> = game.snake().collect();
+        let snake: Vec<Point> = game.snake().map(|p| p.add(ui_shift)).collect();
 
         // Erase previous printed points and avoid flickering if we clear the terminal on each loop repetition
         for (x, y) in previous_prints
             .iter()
             .filter(|p| !snake.contains(p))
-            .map(Point::coords)
+            .map(|p| p.coords())
         {
             queue!(w, cursor::MoveTo(x, y), style::Print(" "),)?;
         }
@@ -55,7 +78,7 @@ where
         }
 
         if let Some(food) = game.food() {
-            let (x, y) = food.coords();
+            let (x, y) = food.add(ui_shift).coords();
 
             queue!(w, cursor::MoveTo(x, y), style::Print("x"),)?;
             previous_prints.push(Point::new(x, y));

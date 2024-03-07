@@ -53,15 +53,14 @@ impl Game {
     }
 
     pub fn tick(&mut self) {
-        let mut new_head = self
+        let mut new_head = *self
             .snake
             .front()
-            .expect("The snake vector should never be empty")
-            .clone();
+            .expect("The snake vector should never be empty");
 
         match self.direction {
             Direction::Up => {
-                new_head.y = new_head.y.checked_sub(1).unwrap_or(self.rows);
+                new_head.y = new_head.y.checked_sub(1).unwrap_or(self.rows - 1);
             }
             Direction::Right => {
                 new_head.x = (new_head.x + 1) % self.columns;
@@ -70,7 +69,7 @@ impl Game {
                 new_head.y = (new_head.y + 1) % self.rows;
             }
             Direction::Left => {
-                new_head.x = new_head.x.checked_sub(1).unwrap_or(self.columns);
+                new_head.x = new_head.x.checked_sub(1).unwrap_or(self.columns - 1);
             }
         };
 
