@@ -1,0 +1,13 @@
+[package]
+name = "snake-rs"
+version = "0.0.0"
+description = "A snake game played in the console and written in Rust"
+repository = "https://github.com/fvilers/snake-rs"
+license = "MIT OR Apache-2.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bin]]
+name = "snake"
+path = "src/main.rs"
