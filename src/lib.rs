@@ -45,21 +45,21 @@ where
             width = GAME_COLUMNS as usize + 2
         )),
         cursor::MoveToNextLine(2),
-        style::Print(format!("╔{}╗", "═".repeat(GAME_COLUMNS as usize))),
+        style::Print(format!("┌{}┐", "─".repeat(GAME_COLUMNS as usize))),
     )?;
 
     for _ in 0..GAME_ROWS {
         queue!(
             w,
             cursor::MoveToNextLine(1),
-            style::Print(format!("║{}║", " ".repeat(GAME_COLUMNS as usize))),
+            style::Print(format!("│{}│", " ".repeat(GAME_COLUMNS as usize))),
         )?;
     }
 
     queue!(
         w,
         cursor::MoveToNextLine(1),
-        style::Print(format!("╚{}╝", "═".repeat(GAME_COLUMNS as usize))),
+        style::Print(format!("└{}┘", "─".repeat(GAME_COLUMNS as usize))),
     )?;
     w.flush()?;
 
