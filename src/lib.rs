@@ -4,7 +4,17 @@ use crossterm::{
     execute, queue, style,
     terminal::{self, ClearType},
 };
-use std::io::{Result, Write};
+use game::Game;
+use point::Point;
+use std::{
+    io::{Result, Write},
+    thread,
+    time::Duration,
+};
+
+mod direction;
+mod game;
+mod point;
 
 /// # Errors
 ///
@@ -16,21 +26,47 @@ where
     execute!(w, terminal::EnterAlternateScreen)?;
     terminal::enable_raw_mode()?;
 
+    let (columns, rows) = terminal::size()?;
+    let mut game = Game::new(columns, rows);
+
     loop {
         queue!(
             w,
             style::ResetColor,
             terminal::Clear(ClearType::All),
             cursor::Hide,
-            cursor::MoveTo(1, 1),
-            style::Print("Hello, world! Press 'q' to exit.")
         )?;
+
+        for (x, y) in game.snake().map(Point::coords) {
+            queue!(w, cursor::MoveTo(x, y), style::Print("O"),)?;
+        }
+
         w.flush()?;
 
-        if read_char()? == 'q' {
-            execute!(w, SetCursorStyle::DefaultUserShape)?;
-            break;
-        };
+        if event::poll(Duration::from_secs(0))? {
+            if let Event::Key(KeyEvent {
+                code,
+                modifiers: _,
+                kind: KeyEventKind::Press,
+                state: _,
+            }) = event::read()?
+            {
+                match code {
+                    KeyCode::Up => game.up(),
+                    KeyCode::Right => game.right(),
+                    KeyCode::Down => game.down(),
+                    KeyCode::Left => game.left(),
+                    KeyCode::Char('q') => {
+                        execute!(w, SetCursorStyle::DefaultUserShape)?;
+                        break;
+                    }
+                    _ => {}
+                }
+            }
+        }
+
+        game.tick();
+        thread::sleep(Duration::from_millis(250));
     }
 
     execute!(
@@ -40,18 +76,4 @@ where
         terminal::LeaveAlternateScreen
     )?;
     terminal::disable_raw_mode()
-}
-
-fn read_char() -> Result<char> {
-    loop {
-        if let Ok(Event::Key(KeyEvent {
-            code: KeyCode::Char(c),
-            kind: KeyEventKind::Press,
-            modifiers: _,
-            state: _,
-        })) = event::read()
-        {
-            return Ok(c);
-        }
-    }
 }

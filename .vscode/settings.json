@@ -3,5 +3,5 @@
     "**/target": true,
     "**/Cargo.lock": true
   },
-  "cSpell.words": ["crossterm"]
+  "cSpell.words": ["crossterm", "deque"]
 }
