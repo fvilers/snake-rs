@@ -31,39 +31,7 @@ where
     execute!(w, terminal::EnterAlternateScreen)?;
     terminal::enable_raw_mode()?;
 
-    let ui_shift = Point::new(1, 4);
-
-    queue!(
-        w,
-        style::ResetColor,
-        terminal::Clear(ClearType::All),
-        cursor::Hide,
-        terminal::SetTitle("Snake"),
-        cursor::MoveTo(1, 1),
-        style::Print(format!(
-            "{:^width$}",
-            "Snake (press 'q' to exit)",
-            width = GAME_COLUMNS as usize + 2
-        )),
-        cursor::MoveToNextLine(2),
-        style::Print(format!("┌{}┐", "─".repeat(GAME_COLUMNS as usize))),
-    )?;
-
-    for _ in 0..GAME_ROWS {
-        queue!(
-            w,
-            cursor::MoveToNextLine(1),
-            style::Print(format!("│{}│", " ".repeat(GAME_COLUMNS as usize))),
-        )?;
-    }
-
-    queue!(
-        w,
-        cursor::MoveToNextLine(1),
-        style::Print(format!("└{}┘", "─".repeat(GAME_COLUMNS as usize))),
-    )?;
-    w.flush()?;
-
+    let ui_shift = draw_ui(w)?;
     let mut game = Game::new(GAME_COLUMNS, GAME_ROWS);
     let mut previous_prints: Vec<Point> = Vec::new();
 
@@ -146,6 +114,44 @@ where
     }
 
     Ok(())
+}
+
+fn draw_ui<W>(w: &mut W) -> Result<Point>
+where
+    W: Write,
+{
+    queue!(
+        w,
+        style::ResetColor,
+        terminal::Clear(ClearType::All),
+        cursor::Hide,
+        terminal::SetTitle("Snake"),
+        cursor::MoveTo(1, 1),
+        style::Print(format!(
+            "{:^width$}",
+            "Snake (press 'q' to exit)",
+            width = GAME_COLUMNS as usize + 2
+        )),
+        cursor::MoveToNextLine(2),
+        style::Print(format!("┌{}┐", "─".repeat(GAME_COLUMNS as usize))),
+    )?;
+
+    for _ in 0..GAME_ROWS {
+        queue!(
+            w,
+            cursor::MoveToNextLine(1),
+            style::Print(format!("│{}│", " ".repeat(GAME_COLUMNS as usize))),
+        )?;
+    }
+
+    queue!(
+        w,
+        cursor::MoveToNextLine(1),
+        style::Print(format!("└{}┘", "─".repeat(GAME_COLUMNS as usize))),
+    )?;
+    w.flush()?;
+
+    Ok(Point::new(1, 4))
 }
 
 fn pluralize(q: u32, singular: &str, plural: &str) -> String {
