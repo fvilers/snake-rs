@@ -1,7 +1,8 @@
 use crossterm::{
     cursor::{self, SetCursorStyle},
     event::{self, Event, KeyCode, KeyEvent, KeyEventKind},
-    execute, queue, style,
+    execute, queue,
+    style::{self},
     terminal::{self, ClearType},
 };
 use game::Game;
@@ -80,14 +81,14 @@ where
         previous_prints.clear();
 
         for (x, y) in snake.iter().map(|p| p.coords()) {
-            queue!(w, cursor::MoveTo(x, y), style::Print("O"),)?;
+            queue!(w, cursor::MoveTo(x, y), style::Print("@"),)?;
             previous_prints.push(Point::new(x, y));
         }
 
         if let Some(food) = game.food() {
             let (x, y) = food.add(ui_shift).coords();
 
-            queue!(w, cursor::MoveTo(x, y), style::Print("x"),)?;
+            queue!(w, cursor::MoveTo(x, y), style::Print("Ȭ"),)?;
             previous_prints.push(Point::new(x, y));
         }
 
