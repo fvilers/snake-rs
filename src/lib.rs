@@ -30,14 +30,21 @@ where
     execute!(w, terminal::EnterAlternateScreen)?;
     terminal::enable_raw_mode()?;
 
-    let ui_shift = Point::new(1, 1);
+    let ui_shift = Point::new(1, 4);
 
     queue!(
         w,
         style::ResetColor,
         terminal::Clear(ClearType::All),
         cursor::Hide,
-        cursor::MoveTo(0, 0),
+        terminal::SetTitle("Snake"),
+        cursor::MoveTo(1, 1),
+        style::Print(format!(
+            "{:^width$}",
+            "Snake (press 'q' to exit)",
+            width = GAME_COLUMNS as usize + 2
+        )),
+        cursor::MoveToNextLine(2),
         style::Print(format!("╔{}╗", "═".repeat(GAME_COLUMNS as usize))),
     )?;
 
