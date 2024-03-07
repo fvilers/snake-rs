@@ -12,9 +12,12 @@ pub struct Game {
     direction: Direction,
     food: Option<Point>,
     rows: u16,
+    score: u32,
     snake: VecDeque<Point>,
     state: GameState,
 }
+
+const FOOD_SCORE: u32 = 50;
 
 impl Game {
     pub fn new(columns: u16, rows: u16) -> Self {
@@ -23,6 +26,7 @@ impl Game {
             direction: Direction::default(),
             food: None,
             rows,
+            score: 0,
             snake: VecDeque::from([Point::default()]),
             state: GameState::Playing,
         }
@@ -34,6 +38,10 @@ impl Game {
 
     pub const fn food(&self) -> &Option<Point> {
         &self.food
+    }
+
+    pub const fn score(&self) -> u32 {
+        self.score
     }
 
     pub fn up(&mut self) {
@@ -92,6 +100,7 @@ impl Game {
 
         if let Some(food) = &self.food {
             if new_head == *food {
+                self.score += FOOD_SCORE;
                 self.food = None;
             } else {
                 self.snake.pop_back();

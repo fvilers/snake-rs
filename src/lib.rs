@@ -68,6 +68,16 @@ where
     let mut previous_prints: Vec<Point> = Vec::new();
 
     while !game.is_over() {
+        queue!(
+            w,
+            cursor::MoveTo(0, 2),
+            style::Print(format!(
+                "{:^width$}",
+                format!("Score: {}", pluralize(game.score(), "point", "points")),
+                width = GAME_COLUMNS as usize + 2
+            )),
+        )?;
+
         let snake: Vec<Point> = game.snake().map(|p| p.add(ui_shift)).collect();
 
         // Erase previous printed points and avoid flickering if we clear the terminal on each loop repetition
@@ -129,8 +139,15 @@ where
     terminal::disable_raw_mode()?;
 
     if game.is_over() {
-        println!("Game over!");
+        println!(
+            "Game over! Final score: {}.",
+            pluralize(game.score(), "point", "points")
+        );
     }
 
     Ok(())
+}
+
+fn pluralize(q: u32, singular: &str, plural: &str) -> String {
+    format!("{q} {}", if q < 2 { singular } else { plural })
 }
