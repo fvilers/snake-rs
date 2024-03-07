@@ -1,12 +1,19 @@
 use crate::{direction::Direction, point::Point};
 use std::collections::{vec_deque::Iter, VecDeque};
 
+#[derive(PartialEq)]
+enum GameState {
+    Playing,
+    Over,
+}
+
 pub struct Game {
     columns: u16,
     direction: Direction,
     food: Option<Point>,
-    snake: VecDeque<Point>,
     rows: u16,
+    snake: VecDeque<Point>,
+    state: GameState,
 }
 
 impl Game {
@@ -17,6 +24,7 @@ impl Game {
             food: None,
             rows,
             snake: VecDeque::from([Point::default()]),
+            state: GameState::Playing,
         }
     }
 
@@ -52,6 +60,10 @@ impl Game {
         }
     }
 
+    pub fn is_over(&self) -> bool {
+        self.state == GameState::Over
+    }
+
     pub fn tick(&mut self) {
         let mut new_head = *self
             .snake
@@ -72,6 +84,11 @@ impl Game {
                 new_head.x = new_head.x.checked_sub(1).unwrap_or(self.columns - 1);
             }
         };
+
+        if self.snake.contains(&new_head) {
+            self.state = GameState::Over;
+            return;
+        }
 
         if let Some(food) = &self.food {
             if new_head == *food {

@@ -59,7 +59,7 @@ where
     let mut game = Game::new(GAME_COLUMNS, GAME_ROWS);
     let mut previous_prints: Vec<Point> = Vec::new();
 
-    loop {
+    while !game.is_over() {
         let snake: Vec<Point> = game.snake().map(|p| p.add(ui_shift)).collect();
 
         // Erase previous printed points and avoid flickering if we clear the terminal on each loop repetition
@@ -118,5 +118,11 @@ where
         cursor::Show,
         terminal::LeaveAlternateScreen
     )?;
-    terminal::disable_raw_mode()
+    terminal::disable_raw_mode()?;
+
+    if game.is_over() {
+        println!("Game over!");
+    }
+
+    Ok(())
 }
