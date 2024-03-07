@@ -14,3 +14,12 @@ crossterm = "0.27"
 [[bin]]
 name = "snake"
 path = "src/main.rs"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+enum_glob_use = "deny"
+pedantic = "deny"
+nursery = "deny"
+unwrap_used = "deny"

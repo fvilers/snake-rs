@@ -6,6 +6,9 @@ use crossterm::{
 };
 use std::io::{Result, Write};
 
+/// # Errors
+///
+/// Will return `Err` for any terminal related errors
 pub fn run<W>(w: &mut W) -> Result<()>
 where
     W: Write,
