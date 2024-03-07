@@ -4,6 +4,7 @@ use std::collections::{vec_deque::Iter, VecDeque};
 pub struct Game {
     columns: u16,
     direction: Direction,
+    food: Option<Point>,
     snake: VecDeque<Point>,
     rows: u16,
 }
@@ -13,14 +14,18 @@ impl Game {
         Self {
             columns,
             direction: Direction::default(),
+            food: None,
             rows,
-            // TODO: replace with `from([Point::default()])` when snake growing is implemented
-            snake: VecDeque::from([Point::new(2, 0), Point::new(1, 0), Point::new(0, 0)]),
+            snake: VecDeque::from([Point::default()]),
         }
     }
 
     pub fn snake(&self) -> Iter<'_, Point> {
         self.snake.iter()
+    }
+
+    pub const fn food(&self) -> &Option<Point> {
+        &self.food
     }
 
     pub fn up(&mut self) {
@@ -69,7 +74,27 @@ impl Game {
             }
         };
 
+        if let Some(food) = &self.food {
+            if new_head == *food {
+                self.food = None;
+            } else {
+                self.snake.pop_back();
+            }
+        } else {
+            self.snake.pop_back();
+        }
+
         self.snake.push_front(new_head);
-        self.snake.pop_back();
+
+        if self.food.is_none() {
+            let mut food = Point::random(self.columns, self.rows);
+
+            // TODO: improve this as it could lead to an infinite loop when the snake will take the whole space
+            while self.snake.contains(&food) {
+                food = Point::random(self.columns, self.rows);
+            }
+
+            self.food = Some(food);
+        }
     }
 }

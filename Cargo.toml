@@ -10,6 +10,7 @@ edition = "2021"
 
 [dependencies]
 crossterm = "0.27"
+rand = "0.8"
 
 [[bin]]
 name = "snake"

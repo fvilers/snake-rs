@@ -54,6 +54,13 @@ where
             previous_prints.push(Point::new(x, y));
         }
 
+        if let Some(food) = game.food() {
+            let (x, y) = food.coords();
+
+            queue!(w, cursor::MoveTo(x, y), style::Print("x"),)?;
+            previous_prints.push(Point::new(x, y));
+        }
+
         w.flush()?;
 
         if event::poll(Duration::from_secs(0))? {
