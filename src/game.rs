@@ -18,6 +18,7 @@ pub struct Game {
 }
 
 const FOOD_SCORE: u32 = 50;
+const SCORE_DECAY_PER_TICK: u32 = 1;
 
 impl Game {
     pub fn new(columns: u16, rows: u16) -> Self {
@@ -103,9 +104,17 @@ impl Game {
                 self.score += FOOD_SCORE;
                 self.food = None;
             } else {
+                self.score = self
+                    .score
+                    .checked_sub(SCORE_DECAY_PER_TICK)
+                    .unwrap_or_default();
                 self.snake.pop_back();
             }
         } else {
+            self.score = self
+                .score
+                .checked_sub(SCORE_DECAY_PER_TICK)
+                .unwrap_or_default();
             self.snake.pop_back();
         }
 
