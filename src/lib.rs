@@ -25,20 +25,33 @@ where
 {
     execute!(w, terminal::EnterAlternateScreen)?;
     terminal::enable_raw_mode()?;
+    execute!(
+        w,
+        style::ResetColor,
+        terminal::Clear(ClearType::All),
+        cursor::Hide,
+    )?;
 
     let (columns, rows) = terminal::size()?;
     let mut game = Game::new(columns, rows);
+    let mut previous_prints: Vec<Point> = Vec::new();
 
     loop {
-        queue!(
-            w,
-            style::ResetColor,
-            terminal::Clear(ClearType::All),
-            cursor::Hide,
-        )?;
+        let snake: Vec<&Point> = game.snake().collect();
 
-        for (x, y) in game.snake().map(Point::coords) {
+        // Erase previous printed points and avoid flickering if we clear the terminal on each loop repetition
+        for (x, y) in previous_prints
+            .iter()
+            .filter(|p| !snake.contains(p))
+            .map(Point::coords)
+        {
+            queue!(w, cursor::MoveTo(x, y), style::Print(" "),)?;
+        }
+        previous_prints.clear();
+
+        for (x, y) in snake.iter().map(|p| p.coords()) {
             queue!(w, cursor::MoveTo(x, y), style::Print("O"),)?;
+            previous_prints.push(Point::new(x, y));
         }
 
         w.flush()?;
