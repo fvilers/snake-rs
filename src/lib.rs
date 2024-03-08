@@ -30,8 +30,14 @@ where
 {
     execute!(w, terminal::EnterAlternateScreen)?;
     terminal::enable_raw_mode()?;
+    execute!(
+        w,
+        style::ResetColor,
+        terminal::Clear(ClearType::All),
+        cursor::Hide,
+    )?;
 
-    let ui_shift = draw_ui(w)?;
+    let ui_offset = draw_ui(w)?;
     let mut game = Game::new(GAME_COLUMNS, GAME_ROWS);
     let mut previous_prints: Vec<Point> = Vec::new();
 
@@ -46,7 +52,7 @@ where
             )),
         )?;
 
-        let snake: Vec<Point> = game.snake().map(|p| p.add(ui_shift)).collect();
+        let snake: Vec<Point> = game.snake().map(|p| p.add(ui_offset)).collect();
 
         // Erase previous printed points and avoid flickering if we clear the terminal on each loop repetition
         for (x, y) in previous_prints
@@ -64,7 +70,7 @@ where
         }
 
         if let Some(food) = game.food() {
-            let (x, y) = food.add(ui_shift).coords();
+            let (x, y) = food.add(ui_offset).coords();
 
             queue!(w, cursor::MoveTo(x, y), style::Print("Ȭ"),)?;
             previous_prints.push(Point::new(x, y));
@@ -120,37 +126,37 @@ fn draw_ui<W>(w: &mut W) -> Result<Point>
 where
     W: Write,
 {
+    let columns = GAME_COLUMNS as usize;
+
     queue!(
         w,
-        style::ResetColor,
-        terminal::Clear(ClearType::All),
-        cursor::Hide,
         terminal::SetTitle("Snake"),
         cursor::MoveTo(1, 1),
         style::Print(format!(
             "{:^width$}",
             "Snake (press 'q' to exit)",
-            width = GAME_COLUMNS as usize + 2
+            width = columns + 2
         )),
         cursor::MoveToNextLine(2),
-        style::Print(format!("┌{}┐", "─".repeat(GAME_COLUMNS as usize))),
+        style::Print(format!("┌{}┐", "─".repeat(columns))),
     )?;
 
     for _ in 0..GAME_ROWS {
         queue!(
             w,
             cursor::MoveToNextLine(1),
-            style::Print(format!("│{}│", " ".repeat(GAME_COLUMNS as usize))),
+            style::Print(format!("│{}│", " ".repeat(columns))),
         )?;
     }
 
     queue!(
         w,
         cursor::MoveToNextLine(1),
-        style::Print(format!("└{}┘", "─".repeat(GAME_COLUMNS as usize))),
+        style::Print(format!("└{}┘", "─".repeat(columns))),
     )?;
     w.flush()?;
 
+    // Return the offset to take into account while drawing game elements
     Ok(Point::new(1, 4))
 }
 
