@@ -8,6 +8,7 @@ enum GameState {
 }
 
 pub struct Game {
+    area: usize,
     columns: u16,
     direction: Direction,
     food: Option<Point>,
@@ -23,6 +24,7 @@ const SCORE_DECAY_PER_TICK: u32 = 1;
 impl Game {
     pub fn new(columns: u16, rows: u16) -> Self {
         Self {
+            area: (columns * rows).into(),
             columns,
             direction: Direction::default(),
             food: None,
@@ -94,7 +96,7 @@ impl Game {
             }
         };
 
-        if self.snake.contains(&new_head) {
+        if self.snake.contains(&new_head) || self.snake.len() == self.area {
             self.state = GameState::Over;
             return;
         }
@@ -120,10 +122,9 @@ impl Game {
 
         self.snake.push_front(new_head);
 
-        if self.food.is_none() {
+        if self.food.is_none() && self.snake.len() != self.area {
             let mut food = Point::random(self.columns, self.rows);
 
-            // TODO: improve this as it could lead to an infinite loop when the snake will take the whole space
             while self.snake.contains(&food) {
                 food = Point::random(self.columns, self.rows);
             }
