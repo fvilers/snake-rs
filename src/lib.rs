@@ -101,7 +101,7 @@ where
         }
 
         game.tick();
-        thread::sleep(Duration::from_millis(250));
+        thread::sleep(Duration::from_millis(game.speed().into()));
     }
 
     execute!(

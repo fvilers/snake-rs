@@ -1,5 +1,8 @@
 use crate::{direction::Direction, point::Point};
-use std::collections::{vec_deque::Iter, VecDeque};
+use std::{
+    cmp,
+    collections::{vec_deque::Iter, VecDeque},
+};
 
 #[derive(PartialEq)]
 enum GameState {
@@ -15,6 +18,7 @@ pub struct Game {
     rows: u16,
     score: u32,
     snake: VecDeque<Point>,
+    speed: u8,
     state: GameState,
 }
 
@@ -31,6 +35,7 @@ impl Game {
             rows,
             score: 0,
             snake: VecDeque::from([Point::default()]),
+            speed: 150,
             state: GameState::Playing,
         }
     }
@@ -45,6 +50,10 @@ impl Game {
 
     pub const fn score(&self) -> u32 {
         self.score
+    }
+
+    pub const fn speed(&self) -> u8 {
+        self.speed
     }
 
     pub fn up(&mut self) {
@@ -104,6 +113,7 @@ impl Game {
         if let Some(food) = &self.food {
             if new_head == *food {
                 self.score += FOOD_SCORE;
+                self.speed = cmp::max(100, self.speed - 1);
                 self.food = None;
             } else {
                 self.score = self
